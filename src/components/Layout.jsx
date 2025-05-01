@@ -1,40 +1,81 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import classNames from "classnames";
+import { useAuth } from "../context/AuthContext";
 
 export default function Layout({ children }) {
   const [menuAberto, setMenuAberto] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const toggleMenu = () => setMenuAberto(!menuAberto);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="bg-blue-600 text-white px-4 py-3 flex justify-between items-center shadow">
-        <h1 className="text-xl font-bold">📘 Questionários</h1>
-        <div className="sm:hidden">
-          <button onClick={() => setMenuAberto(!menuAberto)}>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2"
-                 viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round"
-                    d={menuAberto ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-            </svg>
-          </button>
-        </div>
-        <nav className="hidden sm:flex gap-4">
-          <Link to="/dashboard" className="hover:underline">Dashboard</Link>
+    <div className="flex h-screen overflow-hidden bg-fluent-background">
+      {/* Menu lateral */}
+      <aside
+        className={classNames(
+          "bg-fluent-sidebar text-fluent-textLight w-64 space-y-6 py-6 px-4 transition-transform duration-200 ease-in-out z-30 h-full fixed",
+          {
+            "-translate-x-full": !menuAberto,
+            "translate-x-0": menuAberto,
+          }
+        )}
+      >
+        {/* Botão de fechar no menu */}
+        <button
+          onClick={toggleMenu}
+          className="absolute top-4 right-4 text-white hover:text-red-300"
+          aria-label="Fechar menu"
+        >
+          ✕
+        </button>
+
+        <nav className="flex flex-col gap-3 mt-14">
+          <Link to="/home" onClick={toggleMenu} className="hover:underline">Início</Link>
+          <Link to="/dashboard" onClick={toggleMenu} className="hover:underline">Dashboard</Link>
         </nav>
-      </header>
 
-      {menuAberto && (
-        <nav className="sm:hidden bg-blue-100 p-3 flex flex-col gap-2 text-blue-800 shadow-inner">
-          <Link to="/dashboard" className="hover:underline">Dashboard</Link>
-        </nav>
-      )}
+        <hr className="border-gray-600 my-4" />
 
-      <main className="flex-1 bg-gray-100 p-4">
-        {children}
-      </main>
+        {/* Botão de logout */}
+        <button
+          onClick={() => {
+            logout();
+            navigate("/");
+          }}
+          className="text-left text-red-300 hover:text-red-500"
+        >
+          Sair
+        </button>
+      </aside>
 
-      <footer className="bg-white text-center text-gray-400 p-2 text-sm">
-        &copy; {new Date().getFullYear()} Altair Barbosa
-      </footer>
+      {/* Conteúdo principal */}
+      <div className="flex-1 flex flex-col">
+        <header className="bg-fluent-primary text-white px-6 py-3 flex items-center justify-between shadow">
+          <div className="flex items-center gap-4">
+            <button onClick={toggleMenu}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2"
+                viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d={menuAberto
+                    ? "M6 18L18 6M6 6l12 12" // X icon
+                    : "M4 6h16M4 12h16M4 18h16" // Hamburger icon
+                  } />
+              </svg>
+            </button>
+            <h1 className="text-xl font-semibold">📘 Questions</h1>
+          </div>
+        </header>
+
+        <main className="flex-1 p-4 overflow-auto bg-fluent-background">
+          {children}
+        </main>
+
+        <footer className="bg-white text-center text-gray-400 p-2 text-sm">
+          &copy; {new Date().getFullYear()} Altair Barbosa
+        </footer>
+      </div>
     </div>
   );
 }
