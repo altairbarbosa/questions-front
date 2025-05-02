@@ -18,27 +18,26 @@ export default function Layout({ children }) {
           "bg-fluent-sidebar text-fluent-textLight w-64 space-y-6 py-6 px-4 transition-transform duration-200 ease-in-out z-30 h-full fixed",
           {
             "-translate-x-full": !menuAberto,
-            "translate-x-0": menuAberto,
+            "translate-x-0": menuAberto
           }
         )}
       >
-        {/* Botão de fechar no menu */}
         <button
           onClick={toggleMenu}
           className="absolute top-4 right-4 text-white hover:text-red-300"
-          aria-label="Fechar menu"
         >
           ✕
         </button>
 
         <nav className="flex flex-col gap-3 mt-14">
-          <Link to="/home" onClick={toggleMenu} className="hover:underline">Início</Link>
-          <Link to="/dashboard" onClick={toggleMenu} className="hover:underline">Dashboard</Link>
+          <Link to="/home" onClick={toggleMenu} className="hover:underline">🏠 Início</Link>
+          <Link to="/dashboard" onClick={toggleMenu} className="hover:underline">📊 Dashboard</Link>
+          <Link to="/questionarios" onClick={toggleMenu} className="hover:underline">🧾 Meus Questionários</Link>
+          <Link to="/questionarios-publicos" onClick={toggleMenu} className="hover:underline">🌐 Questionários Públicos</Link>
         </nav>
 
         <hr className="border-gray-600 my-4" />
 
-        {/* Botão de logout */}
         <button
           onClick={() => {
             logout();
@@ -59,9 +58,9 @@ export default function Layout({ children }) {
                 viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round"
                   d={menuAberto
-                    ? "M6 18L18 6M6 6l12 12" // X icon
-                    : "M4 6h16M4 12h16M4 18h16" // Hamburger icon
-                  } />
+                    ? "M6 18L18 6M6 6l12 12"
+                    : "M4 6h16M4 12h16M4 18h16"}
+                />
               </svg>
             </button>
             <h1 className="text-xl font-semibold">📘 Questions</h1>
