@@ -1,60 +1,76 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
 export default function Perguntas() {
-  const { id } = useParams(); // id do questionário
-  const [perguntas, setPerguntas] = useState([]);
-  const [titulo, setTitulo] = useState("");
+  const { id } = useParams(); // ID do questionário
+  const [questionario, setQuestionario] = useState(null);
 
-  const carregar = async () => {
-    try {
-      const [respPerguntas, respQuestionario] = await Promise.all([
-        api.get(`/questionarios/${id}/perguntas`),
-        api.get(`/questionarios/${id}`)
-      ]);
-      setPerguntas(respPerguntas.data);
-      setTitulo(respQuestionario.data.titulo);
-    } catch {
-      alert("Erro ao carregar perguntas");
-    }
+  const carregarDados = () => {
+    api.get(`/questionarios/${id}/perguntas`)
+      .then(res => setQuestionario(res.data))
+      .catch(() => alert("Erro ao carregar perguntas"));
   };
 
   useEffect(() => {
-    carregar();
+    carregarDados();
   }, [id]);
 
-  const excluir = async (perguntaId) => {
-    if (!window.confirm("Deseja excluir esta pergunta?")) return;
+  const excluirPergunta = async (perguntaId) => {
+    const confirmar = window.confirm("Tem certeza que deseja excluir esta pergunta?");
+    if (!confirmar) return;
+
     try {
       await api.delete(`/perguntas/${perguntaId}`);
-      carregar();
-    } catch {
-      alert("Erro ao excluir");
+      carregarDados(); // atualiza a lista após exclusão
+    } catch (err) {
+      alert("Erro ao excluir pergunta");
+      console.error(err);
     }
   };
 
   return (
     <Layout>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Perguntas de: {titulo}</h2>
-        <Link to={`/questionarios/${id}/perguntas/nova`} className="bg-fluent-primary text-white px-4 py-2 rounded hover:bg-blue-700">
-          Nova Pergunta
-        </Link>
-      </div>
-      <ul className="grid md:grid-cols-2 gap-4">
-        {perguntas.map(p => (
-          <li key={p.id} className="p-4 bg-white rounded shadow">
-            <p className="font-medium">{p.enunciado}</p>
-            <p className="text-sm text-gray-500 italic mt-1">Tipo: {p.tipo}</p>
-            <div className="mt-3 flex gap-3">
-              <Link to={`/questionarios/${id}/perguntas/${p.id}`} className="text-blue-600 hover:underline">Editar</Link>
-              <button onClick={() => excluir(p.id)} className="text-red-500 hover:underline">Excluir</button>
+      <h2 className="text-2xl font-bold mb-4">
+        {questionario ? questionario.titulo : "Carregando..."}
+      </h2>
+
+      <Link
+        to={`/questionarios/${id}/perguntas/nova`}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        Nova Pergunta
+      </Link>
+
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {questionario?.perguntas?.length > 0 ? (
+          questionario.perguntas.map((p) => (
+            <div key={p.id} className="bg-white p-4 shadow rounded">
+              <p className="text-gray-700 font-semibold mb-2">{p.texto}</p>
+              <p className="text-sm italic text-gray-500">
+                Tipo: {p.tipo || "Não especificado"}
+              </p>
+              <div className="mt-3 flex gap-4">
+                <Link
+                  to={`/questionarios/${id}/perguntas/${p.id}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  Editar
+                </Link>
+                <button
+                  onClick={() => excluirPergunta(p.id)}
+                  className="text-red-600 hover:underline"
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
-          </li>
-        ))}
-      </ul>
+          ))
+        ) : (
+          <p className="mt-4 text-gray-600">Nenhuma pergunta cadastrada.</p>
+        )}
+      </div>
     </Layout>
   );
 }
